@@ -21,12 +21,20 @@ func buildArgs(pkg, dir string) (string, []string) {
 		r := regexp.MustCompile("[^:]*")
 		dir = r.FindString(os.ExpandEnv("$GOPATH"))
 	}
+	// strip "/" at end of pkg and dir if present to build path correctly
+	if dir[len(dir)-1] == '/' {
+		dir = dir[:len(dir)-1]
+	}
+	if pkg[len(pkg)-1] == '/' {
+		pkg = pkg[:len(pkg)-1]
+	}
 	pkg_dir := runtime.GOOS + "_" + runtime.GOARCH
-	r := regexp.MustCompile("([a-zA-Z0-9_]+)/?$")
+	r := regexp.MustCompile("([^/]+)/?$")
 	pkgName := r.FindStringSubmatch(pkg)[1]
 	dirs := []string{
-		dir + "/src/" + pkg,
-		dir + "/pkg/" + pkg_dir + "/src/" + pkg,
+		dir + "/src/" + pkg + "/",
+		dir + "/pkg/" + pkg_dir + "/" + pkg + "/",
+		dir + "/pkg/" + pkg_dir + "/" + pkg + ".a",
 		dir + "/bin/" + pkgName}
 
 	return pkg, dirs
@@ -34,13 +42,13 @@ func buildArgs(pkg, dir string) (string, []string) {
 
 // uninstall delete the dirs/files of the package
 func uninstall(pkg string, dirs []string) {
-	var okdir = make([]bool, 3)
+	var okdir = make([]bool, 4)
 	for i, d := range dirs {
 		var dtype string
 		switch i {
 		case 0, 1:
 			dtype = "Directory"
-		case 2:
+		case 2, 3:
 			dtype = "File"
 		default:
 			panic("Too many arguments!")

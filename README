@@ -1,1 +1,2 @@
-A simple utility to uninstall go packages and executable
+A simple utility to uninstall go packages and executable.
+Run 'gouninstall' with no arguments for instructions.
